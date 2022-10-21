@@ -181,6 +181,29 @@ class FoldLeftTest {
         verify(binaryOperator, times(4)).apply(anyInt(), anyInt());
         assertEquals(10, result);
     }
+    @Test
+    @DisplayName("Should return a collector")
+    public void foldLeftCollector() {
+        Stream<Integer> stream = Stream.of(1, 2, 3, 4);
+        when(supplierElement.get()).thenReturn(0);
+        when(binaryOperator.apply(anyInt(), anyInt())).thenAnswer(invocation -> sumParams(invocation,0,1));
+
+        Integer result = stream.collect(FoldLeft.foldLeft(supplierElement, binaryOperator));
+
+        verify(binaryOperator, times(4)).apply(anyInt(), anyInt());
+        assertEquals(10, result);
+    }
+    @Test
+    @DisplayName("Should return a collector using a consumer")
+    public void foldLeftCollectorConsumer() {
+        Stream<Integer> stream = Stream.of(1, 2, 3, 4);
+        when(supplier.get()).thenReturn("0");
+
+        String result = stream.collect(FoldLeft.foldLeft(supplier, biConsumer));
+
+        verify(biConsumer, times(4)).accept(anyString(), anyInt());
+        assertEquals("0", result);
+    }
 
     @Test
     @DisplayName("Should return a value wrapped in an optional")
@@ -232,6 +255,36 @@ class FoldLeftTest {
 
         verify(biConsumer, times(4)).accept(anyString(), anyInt());
         assertEquals(Optional.of("Initial"), result);
+    }
+
+    @Test
+    @DisplayName("Should return a collector with an option as a result")
+    public void foldLeftCollectorOptionally() {
+        Stream<Integer> stream = Stream.of(1, 2, 3, 4);
+        when(supplierElement.get()).thenReturn(0);
+        when(binaryOperator.apply(anyInt(), anyInt())).thenAnswer(invocation -> sumParams(invocation,0,1));
+
+        Optional<Integer> result = stream.collect(FoldLeft.foldLeftOptionally(supplierElement, binaryOperator));
+
+        verify(binaryOperator, times(4)).apply(anyInt(), anyInt());
+        assertEquals(Optional.of(10), result);
+    }
+    @Test
+    @DisplayName("Should return an empty optional")
+    public void foldLeftCollectorOptionallyEmpty() {
+        Stream<Integer> stream = Stream.of();
+        Optional<Integer> result = stream.collect(FoldLeft.foldLeftOptionally(supplierElement, binaryOperator));
+        assertEquals(Optional.empty(), result);
+    }
+    @Test
+    @DisplayName("Should return a collector with an option as a result using a consumer")
+    public void foldLeftCollectorOptionallyConsumer() {
+        Stream<Integer> stream = Stream.of(1, 2, 3, 4);
+        when(supplier.get()).thenReturn("0");
+        Optional<String> result = stream.collect(FoldLeft.foldLeftOptionally(supplier, biConsumer));
+
+        verify(biConsumer, times(4)).accept(anyString(), anyInt());
+        assertEquals(Optional.of("0"), result);
     }
 
     private int sumParams(InvocationOnMock invocationOnMock, int x, int x1) {
