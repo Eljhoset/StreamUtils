@@ -35,6 +35,8 @@ class FoldLeftTest {
     Supplier<String> supplier;
     @Mock
     Supplier<Integer> supplierElement;
+    @Mock
+    Consumer<Integer> consumer;
 
     @Test
     @DisplayName("Should stop traversing the stream if the condition in the predicate is met using the element")
@@ -180,6 +182,16 @@ class FoldLeftTest {
 
         verify(binaryOperator, times(4)).apply(anyInt(), anyInt());
         assertEquals(10, result);
+    }
+    @Test
+    @DisplayName("Should traverse the stream ignoring the predicate using consumer")
+    public void foldLeftWithFunctionConsumer() {
+        Stream<Integer> stream = Stream.of(1, 2, 3, 4);
+        when(supplierElement.get()).thenReturn(0);
+        Integer result = FoldLeft.foldLeft(stream, supplierElement,  consumer);
+
+        verify(consumer, times(4)).accept(anyInt());
+        assertEquals(0, result);
     }
     @Test
     @DisplayName("Should return a collector")
